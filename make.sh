@@ -33,11 +33,10 @@ function clean() {
 }
 
 function build() {
-    # sd
     mkdir -p "build"
     cd "build"
     echo $(pwd)
-    if [ "$DEBUG" -eq 1 ]; then cmake ..; else cmake CC=icc CXX=icpc cmake ..; fi
+    CC=icc CXX=icpc cmake ..
     make -j
 }
 
