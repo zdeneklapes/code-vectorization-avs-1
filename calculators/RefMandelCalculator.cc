@@ -18,8 +18,8 @@ RefMandelCalculator::RefMandelCalculator(unsigned matrixBaseSize, unsigned limit
 
 RefMandelCalculator::~RefMandelCalculator()
 {
-	free(data);
-	data = NULL;
+    free(data);
+    data = NULL;
 }
 
 template <typename T>

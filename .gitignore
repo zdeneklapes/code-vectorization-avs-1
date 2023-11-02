@@ -24,6 +24,7 @@ tags
 **/obj
 *.o
 *.dSYM
+tmp/
 
 
 # Third-party
