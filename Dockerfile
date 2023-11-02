@@ -42,5 +42,7 @@ RUN apt-get update \
         wget \
     && apt-get clean
 
+RUN pip3 install --upgrade pip numpy matplotlib scipy pandas seaborn
+
 WORKDIR /home/app
 CMD ["/usr/bin/fish"]

@@ -10,7 +10,7 @@ GREEN='\033[0;32m'
 function clean() {
     # Folders
     for folder in \
-        "cmake-build-debug" \
+        "cmake-build-debug*" \
         "build_advisor" \
         "build"; do
         if [ "$DEBUG" -eq 1 ]; then find . -type d -iname "${folder}"; else find . -type d -iname "${folder}" | xargs ${RM} -rf; fi
@@ -33,10 +33,11 @@ function clean() {
 }
 
 function build() {
+    # sd
     mkdir -p "build"
     cd "build"
     echo $(pwd)
-    CC=icc CXX=icpc cmake ..
+    if [ "$DEBUG" -eq 1 ]; then cmake ..; else cmake CC=icc CXX=icpc cmake ..; fi
     make -j
 }
 
