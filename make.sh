@@ -20,6 +20,7 @@ function clean() {
     for file in \
         "*.DS_Store" \
         "tags" \
+        "slurm*.out" \
         "*.zip"; do
 #        "db.sqlite3" \
 #        "*.png" \
