@@ -45,7 +45,6 @@ protected:
     const int limit;
     bool batchMode;
 
-
 	const double x_start; // minimal real value
 	const double x_fin; // maximal real value
 	const double y_start; // minimal imag value

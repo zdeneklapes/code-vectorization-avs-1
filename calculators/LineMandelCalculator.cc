@@ -36,12 +36,12 @@ LineMandelCalculator::~LineMandelCalculator() {
 
 int *LineMandelCalculator::calculateMandelbrot() {
     // @TODO implement the calculator & return array of integers
-    int h2 = height / 2;
+    int height_div_2 = height / 2;
 
-    for (int i = 0; i <= h2; i++) {
-        int rowIndex = i * width;
-        float imag = y_start + i * dy;
-        int cpRowIndex = (height - i - 1) * width;
+    for (int row_index_2d = 0; row_index_2d <= height_div_2; row_index_2d++) {
+        int row_index_1d = row_index_2d * width;
+        float imag = y_start + row_index_2d * dy;
+        int cpRowIndex = (height - row_index_2d - 1) * width;
 
         //init values
         // SIMD = Single Instruction / Multiple Data
@@ -54,19 +54,19 @@ int *LineMandelCalculator::calculateMandelbrot() {
         //fill empty
 #pragma omp for simd simdlen(64)
         for (int j = 0; j < width; j++) {
-            data[rowIndex + j] = limit;
+            data[row_index_1d + j] = limit;
         }
 
         int sum = width;
         for (int iteration = 0; iteration < limit; ++iteration) {
 #pragma omp simd reduction(-: sum) simdlen(64)
             for (int j = 0; j < width; j++) {
-                if (data[rowIndex + j] == limit) {
+                if (data[row_index_1d + j] == limit) {
                     float r2 = zReal[j] * zReal[j];
                     float i2 = zImag[j] * zImag[j];
 
                     if (r2 + i2 > 4.0f) {
-                        data[rowIndex + j] = iteration;
+                        data[row_index_1d + j] = iteration;
                         sum = sum - 1;
                     } else {
                         zImag[j] = 2.0f * zReal[j] * zImag[j] + imag;
@@ -81,7 +81,7 @@ int *LineMandelCalculator::calculateMandelbrot() {
         //copy
 #pragma omp simd simdlen(64)
         for (int j = 0; j < width; j++) {
-            data[cpRowIndex + j] = data[rowIndex + j];
+            data[cpRowIndex + j] = data[row_index_1d + j];
         }
 
     }
