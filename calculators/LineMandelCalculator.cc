@@ -45,21 +45,21 @@ int *LineMandelCalculator::calculateMandelbrot() {
 
         //init values
         // SIMD = Single Instruction / Multiple Data
-#pragma omp for simd simdlen(64)
+//#pragma omp for simd simdlen(64)
         for (int j = 0; j < width; j++) {
             zReal[j] = x_start + j * dx; // current real value
             zImag[j] = imag;             // current imaginary value
         }
 
         //fill empty
-#pragma omp for simd simdlen(64)
+//#pragma omp for simd simdlen(64)
         for (int j = 0; j < width; j++) {
             data[row_index_1d + j] = limit;
         }
 
         int sum = width;
         for (int iteration = 0; iteration < limit; ++iteration) {
-#pragma omp simd reduction(-: sum) simdlen(64)
+//#pragma omp simd reduction(-: sum) simdlen(64)
             for (int j = 0; j < width; j++) {
                 if (data[row_index_1d + j] == limit) {
                     float r2 = zReal[j] * zReal[j];
@@ -79,7 +79,7 @@ int *LineMandelCalculator::calculateMandelbrot() {
         }
 
         //copy
-#pragma omp simd simdlen(64)
+//#pragma omp simd simdlen(64)
         for (int j = 0; j < width; j++) {
             data[cpRowIndex + j] = data[row_index_1d + j];
         }

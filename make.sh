@@ -6,6 +6,7 @@ RM="rm -rfd"
 RED='\033[0;31m'
 NC='\033[0m'
 GREEN='\033[0;32m'
+CURRENT_DIR_NAME=$(basename $(pwd))
 
 function clean() {
     # Folders
@@ -22,12 +23,12 @@ function clean() {
         "tags" \
         "slurm*.out" \
         "*.zip"; do
-#        "db.sqlite3" \
-#        "*.png" \
-#        "*.log" \
-#        "coverage.xml" \
-#        "*.coverage" \
-#        "coverage.lcov"; do
+        #        "db.sqlite3" \
+        #        "*.png" \
+        #        "*.log" \
+        #        "coverage.xml" \
+        #        "*.coverage" \
+        #        "coverage.lcov"; do
         if [ "$DEBUG" -eq 1 ]; then find . -type f -iname "${file}"; else find . -type f -iname "${file}" | xargs ${RM}; fi
     done
 }
@@ -67,7 +68,6 @@ function test_fast() {
     ./build/mandelbrot -c ref -s 4096 res.npz
 }
 
-
 function help() {
     # Print usage on stdout
     echo "Available functions:"
@@ -80,7 +80,10 @@ function help() {
     done
 }
 
-function rsync_to_barbora() {
+function test_on_barbora() {
+    # This function is used to test the code on Barbora
+    # This copy code to Barbora, build it and run sbatch advisor.sl and evaluate.sl
+
     # Create archive
     zip_name="xlapes02.zip"
 
@@ -92,28 +95,32 @@ function rsync_to_barbora() {
 
     # rm archive on local machine and on server
     rm ${zip_name}
-    ssh avs_barbora "cd ~/repos && rm -rfd code-vectorization-avs-1 && unzip -d code-vectorization-avs-1 ${zip_name} && rm ${zip_name}"
+    ssh avs_barbora "cd ~/repos && rm -rfd ${CURRENT_DIR_NAME} && unzip -d ${CURRENT_DIR_NAME} ${zip_name} && rm ${zip_name}"
 
     # Run advisor and evaluate
-    ssh avs_barbora "cd ~/repos/code-vectorization-avs-1 && sbatch advisor.sl; sbatch evaluate.sl"
+    ssh avs_barbora "cd ~/repos/${CURRENT_DIR_NAME} && sbatch advisor.sl; sbatch evaluate.sl"
 }
 
 function backup() {
     CMD="squeue --me -l -t RUNNING --noheader | wc -l"
-    if [ "$(ssh avs_barbora "$CMD")" == "0" ]; then
-        echo -e "${GREEN}All jobs finished${NC}"
-        time=$(date +%Y-%m-%d_%H-%M)
-        for i in "build_evaluate" "build_advisor"; do
-            mkdir -p tmp/backups/${time}/${i}
-        done
-        rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/code-vectorization-avs-1/build_evaluate/tmp_*" tmp/backups/${time}/build_evaluate/
-        rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/code-vectorization-avs-1/build_advisor/Advisor-*" tmp/backups/${time}/build_advisor/
-        for i in "csv" "out"; do
-            rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/code-vectorization-avs-1/*.${i}" tmp/backups/${time}/
-        done
-    else
-        echo -e "${RED}Some jobs are still running${NC}"
-    fi
+    while [ 1 ]; do
+        if [ "$(ssh avs_barbora "$CMD")" == "0" ]; then
+            echo -e "${GREEN}All jobs finished${NC}"
+            time=$(date +%Y-%m-%d_%H-%M)
+            for i in "build_evaluate" "build_advisor"; do
+                mkdir -p tmp/backups/${time}/${i}
+            done
+            rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/${CURRENT_DIR_NAME}/build_evaluate/tmp_*" tmp/backups/${time}/build_evaluate/
+            rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/${CURRENT_DIR_NAME}/build_advisor/Advisor-*" tmp/backups/${time}/build_advisor/
+            for i in "csv" "out"; do
+                rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/${CURRENT_DIR_NAME}/*.${i}" tmp/backups/${time}/
+            done
+            break
+        else
+            echo -e "${RED}Some jobs are still running: Waiting 10s${NC}"
+            sleep 10
+        fi
+    done
 }
 
 function usage() {
