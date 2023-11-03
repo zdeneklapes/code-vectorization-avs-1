@@ -36,26 +36,26 @@ LineMandelCalculator::~LineMandelCalculator() {
 
 int *LineMandelCalculator::calculateMandelbrot() {
     // @TODO implement the calculator & return array of integers
-#pragma omp simd simdlen(64) linear(i) aligned(data: 64)
+#pragma omp simd simdlen(64)
     for (int i = 0; i < height * width; ++i) {
         data[i] = limit;
     }
 
+#pragma omp simd
     for (int i_index = 0; i_index < height / 2; i_index++) {
         int i_index_from_top = i_index * width;
         int i_index_from_bottom = (height - i_index - 1) * width;
         float imag = y_start + i_index * dy;
 
-#pragma omp simd simdlen(64) linear(r_index)
+#pragma omp simd simdlen(64)
         for (int r_index = 0; r_index < width; r_index++) {
             z_real[r_index] = x_start + r_index * dx; // current real value
             z_imag[r_index] = imag;
         }
 
         int cell_count = width;
-#pragma omp simd
         for (int iteration = 0; iteration < limit; ++iteration) {
-#pragma omp simd simdlen(64)
+#pragma omp simd reduction(-:cell_count) simdlen(64)
             for (int r_index = 0; r_index < width; r_index++) {
                 if (data[i_index_from_top + r_index] != limit) {
                     // Skip already calculated cells

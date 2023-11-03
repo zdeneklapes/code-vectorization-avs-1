@@ -88,7 +88,33 @@ function send_code_to_barbora() {
     zip_name="xlapes02.zip"
 
     # Create archive
-    git archive -o ${zip_name} HEAD
+    #    git archive -o ${zip_name} HEAD
+    zip -r ${zip_name} \
+        CMakeLists.txt \
+        Dockerfile \
+        MB-xlogin00.txt \
+        advisor.sl \
+        calculators/BaseMandelCalculator.cc \
+        calculators/BaseMandelCalculator.h \
+        calculators/BatchMandelCalculator.cc \
+        calculators/BatchMandelCalculator.h \
+        calculators/LineMandelCalculator.cc \
+        calculators/LineMandelCalculator.h \
+        calculators/RefMandelCalculator.cc \
+        calculators/RefMandelCalculator.h \
+        common/cnpy.cc \
+        common/cnpy.h \
+        common/cxxopts.hpp \
+        common/vector_helpers.h \
+        config/context_values.cfg \
+        config/state.cfg \
+        evaluate.sl \
+        main.cc \
+        make.sh \
+        scripts/compare.py \
+        scripts/compare.sh \
+        scripts/plot_evaluate.py \
+        scripts/visualise.py
 
     # Send archive
     scp ${zip_name} 'avs_barbora:~/repos'
@@ -141,7 +167,7 @@ function usage() {
 
 function check_mem_leaks() {
     DEBUG=1 build
-#    valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=tmp/valgrind.out ./build/mandelbrot -c batch -s 512 tmp/res_batch.npz
+    #    valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=tmp/valgrind.out ./build/mandelbrot -c batch -s 512 tmp/res_batch.npz
     valgrind ./build/mandelbrot -c batch -s 512 tmp/res_batch.npz || true
 }
 
