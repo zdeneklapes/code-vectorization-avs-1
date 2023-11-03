@@ -9,15 +9,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    message("Using Clang")
   # using Clang
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using GCC
+    # if DEBUG=1, then we want to compile with -g
+    set(CMAKE_CXX_FLAGS "-O0 -g ${CMAKE_CXX_FLAGS}")
+#    set(CMAKE_CXX_FLAGS "-O3 -march=native -mtune=native ${CMAKE_CXX_FLAGS}")
 #    set(CMAKE_CXX_FLAGS "-O3 -march=native -mtune=native ${CMAKE_CXX_FLAGS}")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     # using icc
+    message("Using ICC")
     set(CMAKE_CXX_FLAGS "-O3 -mavx2 -xHost -g -qopenmp-simd -qopt-report=1 -qopt-report-phase=vec")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # using Visual Studio C++
+    message("Using MSVC")
 endif()
 
 find_package(ZLIB)

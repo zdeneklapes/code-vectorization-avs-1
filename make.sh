@@ -36,7 +36,7 @@ function build() {
     mkdir -p "build"
     cd "build"
     echo $(pwd)
-    CC=icc CXX=icpc cmake ..
+    if [ "$DEBUG" -eq 1 ]; then DEBUG="$DEBUG" cmake ..; else CC=icc CXX=icpc cmake ..; fi
     make -j
 }
 

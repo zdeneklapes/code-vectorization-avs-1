@@ -30,5 +30,5 @@ for calc in "ref" "batch" "line"; do
     advixe-cl -collect tripcounts -flop -project-dir Advisor-$calc  -- ./mandelbrot -c $calc -s 4096
 
    # Memory access
-    advixe-cl -collect memory-access -project-dir Advisor-$calc  -- ./mandelbrot -c $calc -s 4096
+    advixe-cl -collect map -project-dir Advisor-$calc  -- ./mandelbrot -c $calc -s 4096
 done

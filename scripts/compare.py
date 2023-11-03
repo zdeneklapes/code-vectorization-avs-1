@@ -64,7 +64,6 @@ if __name__ == "__main__":
     parser.add_argument("file1", type=str)
     parser.add_argument("file2", type=str)
 
-
     args = parser.parse_args()
 
     if not main(**vars(args)):
