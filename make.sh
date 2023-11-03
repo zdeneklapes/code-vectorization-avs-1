@@ -81,20 +81,39 @@ function help() {
 }
 
 function rsync_to_barbora() {
-    rsync -avz --exclude={"*.git", ".idea", "tmp", "cmake-build-debug*", "build*", "*.pdf", "*.zip"} -e ssh . "avs_barbora:\$(pwd)/repos/code-vectorization-avs-1"
+    # Create archive
+    zip_name="xlapes02.zip"
+
+    # Create archive
+    git archive -o ${zip_name} HEAD
+
+    # Send archive
+    scp ${zip_name} 'avs_barbora:~/repos'
+
+    # rm archive on local machine and on server
+    rm ${zip_name}
+    ssh avs_barbora "cd ~/repos && rm -rfd code-vectorization-avs-1 && unzip -d code-vectorization-avs-1 ${zip_name} && rm ${zip_name}"
+
+    # Run advisor and evaluate
+    ssh avs_barbora "cd ~/repos/code-vectorization-avs-1 && sbatch advisor.sl; sbatch evaluate.sl"
 }
 
-function rsync_to_macbook() {
-    time=$(date +%Y-%m-%d_%H-%M)
-
-    for i in "build_evaluate" "build_advisor"; do
-        mkdir -p tmp/backups/${time}/${i}
-        rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/code-vectorization-avs-1/${i}/**" tmp/backups/${time}/${i}
-    done
-
-    for i in "csv" "out"; do
-        rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/code-vectorization-avs-1/*.${i}" tmp/backups/${time}/
-    done
+function backup() {
+    CMD="squeue --me -l -t RUNNING --noheader | wc -l"
+    if [ "$(ssh avs_barbora "$CMD")" == "0" ]; then
+        echo -e "${GREEN}All jobs finished${NC}"
+        time=$(date +%Y-%m-%d_%H-%M)
+        for i in "build_evaluate" "build_advisor"; do
+            mkdir -p tmp/backups/${time}/${i}
+        done
+        rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/code-vectorization-avs-1/build_evaluate/tmp_*" tmp/backups/${time}/build_evaluate/
+        rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/code-vectorization-avs-1/build_advisor/Advisor-*" tmp/backups/${time}/build_advisor/
+        for i in "csv" "out"; do
+            rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/code-vectorization-avs-1/*.${i}" tmp/backups/${time}/
+        done
+    else
+        echo -e "${RED}Some jobs are still running${NC}"
+    fi
 }
 
 function usage() {
