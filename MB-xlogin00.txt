@@ -8,6 +8,17 @@
 2. Jaká byla dosažena výkonnost v Intel Advisoru pro jednotlivé implementace 
 (v GFLOPS)?
 ==============================================================================
+Calculator:        LineMandelCalculator
+Base size:         4096
+Matrix size:       12288x8192
+Iteration limit:   100
+GFLOPS: 12.21
+
+Calculator:        BatchMandelCalculator
+Base size:         4096
+Matrix size:       12288x8192
+Iteration limit:   100
+GFLOPS: 14.41 pro
 
 
 3. Jaká část kódu byla vektorizována v "Line" implementaci? Vyčteme tuto 
