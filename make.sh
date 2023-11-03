@@ -80,9 +80,8 @@ function help() {
     done
 }
 
-function test_on_barbora() {
-    # This function is used to test the code on Barbora
-    # This copy code to Barbora, build it and run sbatch advisor.sl and evaluate.sl
+function send_code_to_barbora() {
+    # This function is used to send code to Barbora
 
     # Create archive
     zip_name="xlapes02.zip"
@@ -96,7 +95,12 @@ function test_on_barbora() {
     # rm archive on local machine and on server
     rm ${zip_name}
     ssh avs_barbora "cd ~/repos && rm -rfd ${CURRENT_DIR_NAME} && unzip -d ${CURRENT_DIR_NAME} ${zip_name} && rm ${zip_name}"
+}
 
+function test_on_barbora() {
+    # This function is used to test the code on Barbora
+    # This copy code to Barbora, build it and run sbatch advisor.sl and evaluate.sl
+    send_code_to_barbora
     # Run advisor and evaluate
     ssh avs_barbora "cd ~/repos/${CURRENT_DIR_NAME} && sbatch advisor.sl; sbatch evaluate.sl"
 }
