@@ -36,14 +36,11 @@ LineMandelCalculator::~LineMandelCalculator() {
 
 int *LineMandelCalculator::calculateMandelbrot() {
     // @TODO implement the calculator & return array of integers
-
 #pragma omp simd simdlen(64) linear(i) aligned(data: 64)
     for (int i = 0; i < height * width; ++i) {
         data[i] = limit;
     }
 
-
-//#pragma omp simd simdlen(64) linear(i_index) aligned(z_real, z_imag: 64)
     for (int i_index = 0; i_index < height / 2; i_index++) {
         int i_index_first_cell = i_index * width;
         float imag = y_start + i_index * dy;
