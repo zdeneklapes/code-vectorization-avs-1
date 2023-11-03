@@ -107,8 +107,9 @@ function test_on_barbora() {
 
 function backup() {
     CMD="squeue --me -l -t RUNNING --noheader | wc -l"
+    CMD2="squeue --me -l -t PENDING --noheader | wc -l"
     while [ 1 ]; do
-        if [ "$(ssh avs_barbora "$CMD")" == "0" ]; then
+        if [ "$(ssh avs_barbora "$CMD")" == "0" ] && [ "$(ssh avs_barbora "$CMD2")" == "0" ]; then
             echo -e "${GREEN}All jobs finished${NC}"
             time=$(date +%Y-%m-%d_%H-%M)
             for i in "build_evaluate" "build_advisor"; do
@@ -125,6 +126,11 @@ function backup() {
             sleep 10
         fi
     done
+}
+
+function watch_queue() {
+    # Watch queue
+    watch -n 1 "squeue -l | awk 'BEGIN{sum=0; psum = 0} {if(\$5 == \"RUNNING\") sum +=\$8; if (\$5 == \"PENDING\" && \$2 == \"qcpu_exp\") psum +=1;} END {printf \"%+4s/201 nodes used at the moment\n\", sum; printf \"%+4s nodes free\n\", 201-sum; printf \"%+4s pending jobs in queue qcpu_exp\n\", psum}'"
 }
 
 function usage() {

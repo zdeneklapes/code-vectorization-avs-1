@@ -7,7 +7,7 @@
 
 #include <BaseMandelCalculator.h>
 
-#define VECTORIZE_MODE 2
+#define VECTORIZE_MODE 1
 #define DEBUG_LITE  1   // DEBUG_PRINT_LITE
 #define DEBUG_PRINT_LITE(fmt, ...) \
             do { if (DEBUG_LITE) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
@@ -27,6 +27,4 @@ private:
     int *data;
     float *z_real;
     float *z_imag;
-    float *z_real2;
-    float *z_imag2;
 };
