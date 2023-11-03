@@ -42,9 +42,9 @@ int *LineMandelCalculator::calculateMandelbrot() {
     }
 
     for (int i_index = 0; i_index < height / 2; i_index++) {
-        int i_index_first_cell = i_index * width;
-        float imag = y_start + i_index * dy;
+        int i_index_from_top = i_index * width;
         int i_index_from_bottom = (height - i_index - 1) * width;
+        float imag = y_start + i_index * dy;
 
 #pragma omp simd simdlen(64) linear(r_index)
         for (int r_index = 0; r_index < width; r_index++) {
@@ -57,7 +57,7 @@ int *LineMandelCalculator::calculateMandelbrot() {
         for (int iteration = 0; iteration < limit; ++iteration) {
 #pragma omp simd simdlen(64)
             for (int r_index = 0; r_index < width; r_index++) {
-                if (data[i_index_first_cell + r_index] != limit) {
+                if (data[i_index_from_top + r_index] != limit) {
                     // Skip already calculated cells
                     continue;
                 }
@@ -67,8 +67,10 @@ int *LineMandelCalculator::calculateMandelbrot() {
                 float i2 = z_imag[r_index] * z_imag[r_index];
 
                 if (r2 + i2 > 4.0f) {
-                    data[i_index_first_cell + r_index] = iteration; // Set cell in the part above the X-axis
-                    data[i_index_from_bottom + r_index] = iteration; // Set cell in the part below the X-axis
+                    // Set cell in the part above the X-axis
+                    data[i_index_from_top + r_index] = iteration;
+                    // Set cell in the part below the X-axis
+                    data[i_index_from_bottom + r_index] = iteration;
                     cell_count = cell_count - 1;
                     continue;
                 }

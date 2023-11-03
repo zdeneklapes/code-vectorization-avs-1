@@ -19,9 +19,9 @@
 BatchMandelCalculator::BatchMandelCalculator(unsigned matrixBaseSize, unsigned limit) :
         BaseMandelCalculator(matrixBaseSize, limit, "BatchMandelCalculator") {
     // @TODO allocate & prefill memory
-    data = (int *) (aligned_alloc(height * width * sizeof(int), 64));
-    z_real = (float *) (aligned_alloc(width * sizeof(float), 64));
-    z_imag = (float *) (aligned_alloc(width * sizeof(float), 64));
+    data = (int *) (aligned_alloc(64, height * width * sizeof(int)));
+    z_real = (float *) (aligned_alloc(64, BATCH_SIZE * sizeof(float)));
+    z_imag = (float *) (aligned_alloc(64, BATCH_SIZE * sizeof(float)));
 }
 
 BatchMandelCalculator::~BatchMandelCalculator() {
@@ -39,69 +39,61 @@ int *BatchMandelCalculator::calculateMandelbrot() {
     // @TODO implement the calculation
 
     // Set all cells to limit
+#pragma omp simd simdlen(64) linear(i) aligned(data: 64)
     for (int i = 0; i < height * width; ++i) {
         data[i] = limit;
     }
 
+    int i_count = height / 2;
+#pragma omp simd
+    for (int i_index = 0; i_index < i_count; i_index++) {
+        int i_index_from_top = i_index * width;
+        int i_index_from_bottom = (height - i_index - 1) * width;
+        float imag = y_start + i_index * dy;
 
-    for (int iteration = 0; iteration < limit; ++iteration) {
-        int cell_count = width;
-        for (int i = 0; i < height * width; ++i) {
-            if (data[i] != limit) { // Skip already calculated cells
-                continue;
+        int batch_count = std::ceil((float) width / BATCH_SIZE);
+#pragma omp simd simdlen(64) linear(batch_index)
+        for (int batch_index = 0; batch_index < batch_count; batch_index++) {
+            int r_index_start = batch_index * BATCH_SIZE;
+
+#pragma omp simd
+            for (int b_index = 0; b_index < BATCH_SIZE; b_index++) {
+                int r_index = r_index_start + b_index;
+                z_real[b_index] = x_start + r_index * dx;
+                z_imag[b_index] = imag;
             }
 
-            // Calculate next iteration
-            float r2 = z_real[i] * z_real[i];
-            float i2 = z_imag[i] * z_imag[i];
+            int cell_count = BATCH_SIZE;
+            for (int iteration = 0; iteration < limit; iteration++) {
+#pragma omp simd simdlen(64)
+                for (int b_index = 0; b_index < BATCH_SIZE; b_index++) {
+                    int r_index = r_index_start + b_index;
 
-            if (r2 + i2 > 4.0f) {
-                data[i] = iteration; // Set cell in the part above the X-axis
-                data[(height * width) - i - 1] = iteration; // Set cell in the part below the X-axis
-                cell_count = cell_count - 1;
-                continue;
+                    if (data[i_index_from_top + r_index] != limit) {
+                        // Skip already calculated cells
+                        continue;
+                    }
+
+                    // Calculate next iteration
+                    float r2 = z_real[b_index] * z_real[b_index];
+                    float i2 = z_imag[b_index] * z_imag[b_index];
+
+                    if (r2 + i2 > 4.0f) {
+                        // Set cell in the part above the X-axis
+                        data[i_index_from_top + r_index] = iteration;
+                        // Set cell in the part below the X-axis
+                        data[i_index_from_bottom + r_index] = iteration;
+                        cell_count = cell_count - 1;
+                        continue;
+                    }
+
+                    z_imag[b_index] = 2.0f * z_real[b_index] * z_imag[b_index] + imag;
+                    z_real[b_index] = r2 - i2 + (x_start + r_index * dx);
+                }
+                if (!cell_count) break;
             }
-
-            z_imag[i] = 2.0f * z_real[i] * z_imag[i] + y_start;
-            z_real[i] = r2 - i2 + (x_start + i * dx);
         }
     }
 
     return data;
-
-#if 0
-    for (int b_index = 0; b_index < std::ceil((float) height * width / BLOCK_SIZE); ++b_index) {
-        int i_index = (b_index * BLOCK_SIZE) / width;
-        float imag = y_start + i_index * dy;
-
-        for (int cell_index = 0; cell_index < ; cell_index++) {
-
-        }
-
-        int cell_count = width;
-        for (int iteration = 0; iteration < limit; ++iteration) {
-            for (int r_index = 0; r_index < width; r_index++) {
-                if (data[r_index] != limit) { // Skip already calculated cells
-                    continue;
-                }
-
-                // Calculate next iteration
-                float r2 = z_real[r_index] * z_real[r_index];
-                float i2 = z_imag[r_index] * z_imag[r_index];
-
-                if (r2 + i2 > 4.0f) {
-                    data[r_index] = iteration; // Set cell in the part above the X-axis
-                    data[height * width - r_index - 1] = iteration; // Set cell in the part below the X-axis
-                    cell_count = cell_count - 1;
-                    continue;
-                }
-
-                z_imag[r_index] = 2.0f * z_real[r_index] * z_imag[r_index] + y_start;
-                z_real[r_index] = r2 - i2 + (x_start + r_index * dx);
-            }
-            if (!cell_count) break;
-        }
-
-    }
-#endif
 }

@@ -9,13 +9,7 @@
 
 #include <BaseMandelCalculator.h>
 
-#define BLOCK_SIZE 256
-
-#define mainCluterIStart 0.33
-#define mainCluterIEnd   0.67
-#define mainCluterRStart 0.50
-#define mainCluterREnd   0.73
-
+#define BATCH_SIZE 256
 
 class BatchMandelCalculator : public BaseMandelCalculator
 {

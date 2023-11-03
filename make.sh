@@ -39,6 +39,7 @@ function build() {
     echo $(pwd)
     if [ "$DEBUG" -eq 1 ]; then DEBUG="$DEBUG" cmake ..; else CC=icc CXX=icpc cmake ..; fi
     make -j
+    cd -
 }
 
 function pack() {
@@ -136,6 +137,12 @@ function watch_queue() {
 function usage() {
     # Print usage on stdout
     help
+}
+
+function check_mem_leaks() {
+    DEBUG=1 build
+#    valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=tmp/valgrind.out ./build/mandelbrot -c batch -s 512 tmp/res_batch.npz
+    valgrind ./build/mandelbrot -c batch -s 512 tmp/res_batch.npz || true
 }
 
 function die() {
