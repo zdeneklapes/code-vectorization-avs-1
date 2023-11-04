@@ -46,13 +46,13 @@ function pack() {
     # Clean and Zip project
     ZIP_NAME="xlapes02.zip"
 
-    CMD="zip -r '$ZIP_NAME' \
-        BatchMandelCalculator.cc \
-        BatchMandelCalculator.h \
-        LineMandelCalculator.cc \
-        LineMandelCalculator.h \
-        eval.png \
-        MB-xlogin.txt"
+    CMD="zip -jr '$ZIP_NAME' \
+        MB-xlapes02.txt \
+        calculators/BatchMandelCalculator.cc \
+        calculators/BatchMandelCalculator.h \
+        calculators/LineMandelCalculator.cc \
+        calculators/LineMandelCalculator.h \
+        tmp/backups/2023-11-04_02-10/eval.png"
 
     if [ $DEBUG -eq 1 ]; then echo "$CMD"; else eval "$CMD"; fi
 }
@@ -143,7 +143,11 @@ function backup() {
                 mkdir -p tmp/backups/${time}/${i}
             done
             rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/${CURRENT_DIR_NAME}/build_evaluate/tmp_*" tmp/backups/${time}/build_evaluate/
+            rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/${CURRENT_DIR_NAME}/build_evaluate/*.optrpt" tmp/backups/${time}/build_evaluate/
+            rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/${CURRENT_DIR_NAME}/build_evaluate/CMakeFiles/mandelbrot.dir/calculators/*.optrpt" tmp/backups/${time}/build_evaluate/
+
             rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/${CURRENT_DIR_NAME}/build_advisor/Advisor-*" tmp/backups/${time}/build_advisor/
+            rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/${CURRENT_DIR_NAME}/build_advisor/CMakeFiles/mandelbrot.dir/calculators/*.optrpt" tmp/backups/${time}/build_advisor/
             for i in "csv" "out"; do
                 rsync -avz -e ssh "avs_barbora:\$(pwd)/repos/${CURRENT_DIR_NAME}/*.${i}" tmp/backups/${time}/
             done

@@ -1,0 +1,31 @@
+#### Stručně odpovězte na následující otázky: ######
+
+1. Byla "Line" vektorizace časově efektivní? Proč?
+==============================================================================
+Ano, "Line" vektorizace byla časově efektivní, protože smyčky a instrukce byly
+uspořádány tak, aby byla možná vektorizace.
+Díky tomu nedocházelo k datovým konfliktům a instrukce nepřerušovaly
+pipeliny, což zlepšilo výkonnost.
+
+2. Jaká byla dosažena výkonnost v Intel Advisoru pro jednotlivé implementace 
+(v GFLOPS)?
+==============================================================================
+Výkonnost v Intel Advisoru byla následující:
+
+GFLOPS ref:   2.6   (size: 4096, limit: 100)
+GFLOPS line:  12.21 (size: 4096, limit: 100)
+GFLOPS batch: 14.41 (size: 4096, limit: 100)
+
+3. Jaká část kódu byla vektorizována v "Line" implementaci? Vyčteme tuto 
+informaci i u batch kalkulátoru?
+==============================================================================
+Ve "Line" implementaci byla vektorizována smyčka nejvíce zanořená, která
+obsahovala kód pro výpočet samotného Mandelbrotovy množiny pro celý řádek (tato informace
+platí i pro Batch kalkulátor).
+Dále byly vektorizovány smyčky pro naplnění matice a inicializační výpočty.
+
+4. Co vyčteme z Roofline modelu pro obě vektorizované implementace?
+==============================================================================
+Z Roofline modelu vyplývá, že vektorizace vedla ke zlepšení propustnosti paměti
+a efektivnosti výpočtu z hlediska využití všech jednotek procesoru.
+To se projevilo zvýšením GFLOPS i výpočtu na Byte.

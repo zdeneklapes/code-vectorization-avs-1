@@ -1,8 +1,8 @@
 /**
  * @file BatchMandelCalculator.cc
- * @author FULL NAME <xlogin00@stud.fit.vutbr.cz>
+ * @author Zdenek Lapes <xlapes02@stud.fit.vutbr.cz>
  * @brief Implementation of Mandelbrot calculator that uses SIMD paralelization over small batches
- * @date DATE
+ * @date 3.11.2023
  */
 
 #include <iostream>
@@ -39,24 +39,24 @@ int *BatchMandelCalculator::calculateMandelbrot() {
     // @TODO implement the calculation
 
     // Set all cells to limit
-#pragma omp simd simdlen(64)
+    #pragma omp simd simdlen(64)
     for (int i = 0; i < width * height; ++i) {
         data[i] = limit;
     }
 
     int i_count = height / 2;
-#pragma omp simd simdlen(64)
+//    #pragma omp simd simdlen(64)
     for (int i_index = 0; i_index < i_count; i_index++) {
         int i_index_from_top = i_index * width;
         int i_index_from_bottom = (height - i_index - 1) * width;
         float imag = y_start + i_index * dy;
 
         int batch_count = std::ceil((float) width / BATCH_SIZE);
-#pragma omp simd simdlen(64)
+//        #pragma omp simd simdlen(64)
         for (int batch_index = 0; batch_index < batch_count; batch_index++) {
             int r_index_start = batch_index * BATCH_SIZE;
 
-#pragma omp simd simdlen(64)
+            #pragma omp simd simdlen(64)
             for (int b_index = 0; b_index < BATCH_SIZE; b_index++) {
                 int r_index = r_index_start + b_index;
                 z_real[b_index] = x_start + r_index * dx;
@@ -65,7 +65,7 @@ int *BatchMandelCalculator::calculateMandelbrot() {
 
             int cell_count = BATCH_SIZE;
             for (int iteration = 0; iteration < limit; iteration++) {
-#pragma omp simd reduction(-:cell_count) simdlen(64)
+                #pragma omp simd reduction(-:cell_count) simdlen(64)
                 for (int b_index = 0; b_index < BATCH_SIZE; b_index++) {
                     int r_index = r_index_start + b_index;
 
